@@ -1,5 +1,5 @@
 import React from 'react'
-
+import About from './About'
 const Navbar = () => {
   return (
     <nav className='bg-indigo-900 flex justify-around items-center px-4 h-14'>
@@ -7,7 +7,7 @@ const Navbar = () => {
       <ul>
         <li className='flex gap-3'>
             <a className='hover:font-bold' href='/'>Home</a>
-            <a className='hover:font-bold' href='#'>About</a>
+            <a className='hover:font-bold' href='/about'>About</a>
             <a className='hover:font-bold' href='#'>Contact</a>
         </li>
       </ul>

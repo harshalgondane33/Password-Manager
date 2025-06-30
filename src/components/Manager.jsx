@@ -10,6 +10,8 @@ import { FaRegEye } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 
 const Manager = () => { 
+  const usernameref = useRef(null);
+  const passwordref = useRef(null);
   const ref=useRef(null);
   const [icons, seticons] = useState(eyeOff)
   const [usernamee, setusernamee] = useState("")
@@ -19,6 +21,7 @@ const Manager = () => {
   const [password, setpassword] = useState("")
   const [isInitialLoad, setIsInitialLoad] = useState(true); 
   const [show, setshow] = useState(false)
+  //const [itemshow, setitemshow] = useState(false)
   useEffect(() => {
     let newItem=localStorage.getItem("Items")
     if(newItem)
@@ -37,6 +40,28 @@ const Manager = () => {
     }
     
   }, [Items,isInitialLoad])
+  const validateInputs = () => {
+    const siteRegex = /^[a-zA-Z0-9.-]{3,}$/; // at least 3 characters, letters/numbers/dots/dashes
+    const usernameRegex = /^[a-zA-Z0-9_]{3,}$/; // at least 3 characters, letters/numbers/underscores
+    const passwordMinLength = 6;
+  
+    if (!siteRegex.test(sitename)) {
+      alert("Site name must be at least 3 characters and only include letters, numbers, '.', or '-'.");
+      return false;
+    }
+  
+    if (!usernameRegex.test(usernamee)) {
+      alert("Username must be at least 3 characters and contain only letters, numbers, or underscores.");
+      return false;
+    }
+  
+    if (password.length < passwordMinLength) {
+      alert("Password must be at least 6 characters long.");
+      return false;
+    }
+  
+    return true;
+  };
   
   const handleChange= (e,item) => { 
     if(e.target.name=="sitename")
@@ -56,10 +81,11 @@ const Manager = () => {
     }
    }
   const handleShow = () => {
-    if(password==="")
-    {
-    }
-    else if (!show) {
+    // if(password==="")
+    // {
+
+    // }
+    if (!show) {
       settype('text');
       setshow(true);
       //seticon(eye);
@@ -69,13 +95,31 @@ const Manager = () => {
       setshow(false); 
     }
   }
+  const handlekeydown = (e) => {
+    if(e.key==='Enter')
+    {
+      handleAdd()
+    }
+  }
+  const handleShow2 = (e,itemm) => {
+    const updatedItems = Items.map(item =>
+      item.id === itemm.id
+        ? { ...item, itemshow: !item.itemshow }
+        : item
+    );
+    setItems(updatedItems);
+  }
   const handleAdd = () => { 
-    settype('password');
-    const newItem={id:uuidv4(),username:usernamee,site:sitename,password:password}
+    if (!validateInputs()) return;
+    settype('password');  
+    const newItem={id:uuidv4(),username:usernamee,site:sitename,password:password,itemshow:false}
     console.log(newItem)
     setItems([...Items,newItem])
     console.log(Items)  
-      ref.current.textContent="show"
+      //ref.current.textContent="show"
+      setshow(false)
+      settype('password')
+      //handleShow()
       setsitename("")
       setusernamee("")
       setpassword("")
@@ -86,7 +130,9 @@ const Manager = () => {
     setsitename(item.site)
     setusernamee(item.username)
     setpassword(item.password)
-    // handleChange(e)
+    setshow(false)
+    settype('password')
+    handleChange(e)
     let newItems= Items.filter((items)=>{
       return items.id!==item.id;
     })
@@ -100,18 +146,29 @@ const Manager = () => {
    }
   return (
     <>
-        <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"></div>
+        <div className="inset-0 -z-10 h-full w-full items-center px-5 py-1 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]">
         <div className='mx-auto text-4xl text-center h-22 p-5'><h1 className="logo font-bold text-gray-400"><span className='text-gray-800'>&lt;</span><span> Pass</span><span className='text-gray-800'>Op/</span><span className='text-gray-800'>&gt;</span></h1>
             <h2 className='text-sm text-green-100 m-1'>Your Own Password Manager</h2>
         </div>
-        <div className="container mx-auto">
+        <div className="container mx-auto mb-2 p-2">
             <div className="inputt text-white flex flex-col p-4 gap-2">
-                <input placeholder="Enter the site" className="rounded-full bg-white text-black border-violet-800 border-solid border-1 px-4" type="text" name="sitename" value={sitename} onChange={handleChange} />
+                <input placeholder="Enter the site" className="rounded-full bg-white text-black border-violet-800 border-solid border-1 px-4" type="text" name="sitename" value={sitename} onChange={handleChange} onKeyDown={(e)=>{
+                  if(e.key==='Enter')
+                  {
+                    usernameref.current.focus()
+                  }
+                }}/>
                 <div className="flex gap-4 relative">
-                    <input placeholder="Username" className='rounded-full bg-white text-black border-solid border-violet-800 border-1 px-4' type="text" name="username" value={usernamee} onChange={handleChange}/>
-                    <input placeholder="Password" className='rounded-full bg-white text-black border-solid border-violet-800 border-1 px-4' type={type} name='password'
+                    <input placeholder="Username" className='rounded-full bg-white text-black border-solid border-violet-800 border-1 px-4' type="text" name="username" value={usernamee} onChange={handleChange} ref={usernameref} 
+                    onKeyDown={(e)=>{
+                      if(e.key==='Enter')
+                      {
+                        passwordref.current.focus()
+                      }} }/>
+                    <input placeholder="Password" className='rounded-full bg-white text-black border-solid border-violet-800 border-1 px-4' type={type} name='password' ref={passwordref}
                         value={password}
-                        onChange={handleChange}/>
+                        onChange={handleChange}
+                        onKeyDown={handlekeydown}/>
                       <button className='bg-green-800 rounded-full px-4 cursor-pointer' onClick={handleAdd}>
                        Save Password 
                       </button>                       
@@ -121,13 +178,19 @@ const Manager = () => {
                 </div>
             </div>
             <div className="passcontainer mx-auto min-h-[60vh] p-2 rounded-md bg-slate-100">
+              <div className='flex font-bold text-center'>
+                <h3 className='w-[46vw]'> SiteName</h3>
+                <h3 className='w-[18vw]' >UserName</h3>
+                <h3 className='w-[16vw]'>Password</h3>
+              </div>
               {Items.length==0 && <div className='text-md text-bold'>No Passwords To show</div>}
               {
                 Items.map(item =>{
                   return <div key={item.id} className='Item flex mx-auto'>
                     <div className="site bg-violet-400 rounded-full w-[60vw] px-2 m-1">{item.site}</div>
                     <div className="username bg-violet-400 rounded-full w-[20vw] px-2 m-1">{item.username}</div>
-                    <div className="password bg-violet-400  rounded-full w-[20vw] px-2 m-1">{item.password}</div>
+                    <div className="password bg-violet-400  rounded-full w-[20vw] px-2 m-1">{item.itemshow ? item.password :<div>*********</div>}</div>
+                    <button onClick={(e)=>handleShow2(e,item)} className='bg-violet-200 rounded-md w-fit border-2 border-solid border-black p-1 m-1'>{item.itemshow ? <FaRegEye /> :<FaRegEyeSlash />}</button> 
                     <button onClick={(e)=>handleEdit(e,item)} className='bg-violet-200 rounded-md w-fit border-2 border-solid border-black p-1 m-1'><FaEdit /></button>
                     <button onClick={(e)=> handleDelete(e,item.id)} className='bg-violet-200 rounded-md w-fit border-2 border-solid border-black p-1 m-1'><MdDelete /></button>
                   </div>
@@ -135,6 +198,7 @@ const Manager = () => {
               }
             </div>
         </div>  
+        </div>
 
     </>
   )
